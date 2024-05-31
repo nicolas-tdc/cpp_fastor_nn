@@ -1,59 +1,52 @@
+#pragma once
+
 #include <Fastor/Fastor.h>
 #include <vector>
 
-const size_t InputsCount = 10;
-const size_t OutputsCount = 5;
-const size_t HiddenLayersCount = 20;
-const size_t NeuronsPerLayer = 512;
-
-typedef float Scalar;
-typedef Fastor::Tensor<Scalar, InputsCount> InputTensor;
-typedef Fastor::Tensor<Scalar, OutputsCount> OutputTensor;
-typedef Fastor::Tensor<Scalar, NeuronsPerLayer> HiddenTensor;
-typedef Fastor::Tensor<Scalar, HiddenLayersCount + 1, NeuronsPerLayer> Matrix;
+#include "Layers/InputLayer.h"
+#include "Layers/HiddenLayer.h"
+#include "Layers/OutputLayer.h"
 
 class NeuralNetwork {
 
 public:
-    // Constructor
-    NeuralNetwork(std::vector<uint> topology, Scalar learning_rate = Scalar(0.005));
+
+    // Constructor and destructor.
+
+    NeuralNetwork(Scalar learning_rate = Scalar(0.005));
+
+    ~NeuralNetwork();
+
+    // Processing.
 
     // Forward propagation.
-    void propagateForward(InputTensor& inputs);
+    void forward(BaseTensor& inputs);
 
-    // Backward propagation of gradients.
-    void propagateBackward(OutputTensor& outputs);
+    // Backward propagation.
+    void backward(BaseTensor& outputs);
 
-    // Calculate gradients of each layer.
-    void calculateGradients(OutputTensor& outputs);
-
-    // Update weights from gradients.
-    void updateWeights();
+    // Update weights from error.
+    void update_weights();
 
     // Train the network with input and output data.
-    void train(InputTensor inputs, OutputTensor outputs);
-    
+    void train(BaseTensor& inputs, BaseTensor& outputs);
+
+    // Getters and setters.
+
+    // Layers.
+    void set_layers(Fastor::Tensor<Scalar> architecture);
+    std::vector<BaseLayer> get_layers();
+
+    // Learning rate.
+    void set_learning_rate(Scalar);
+    Scalar get_learning_rate() { return learning_rate; };
+
 private:
-    std::vector<HiddenTensor> neuronLayers; // Values.
-    std::vector<HiddenTensor> cacheLayers; // Unactivated values.
-    std::vector<HiddenTensor> gradients; // Gradients.
-    std::vector<Matrix*> weights; // Matrix of weights.
-    Scalar learningRate; // Learning rate.
 
-// Getters and setters
-public:
-    void setNeuronLayers(std::vector<HiddenTensor>);
-    std::vector<HiddenTensor> getNeuronLayers() { return neuronLayers; };
+    // Properties.
 
-    void setCacheLayers(std::vector<HiddenTensor>);
-    std::vector<HiddenTensor> getCacheLayers() { return cacheLayers; };
+    std::vector<BaseLayer> layers;
 
-    void setGradients(std::vector<HiddenTensor>);
-    std::vector<HiddenTensor> getGradients() { return gradients; };
+    Scalar learning_rate;
 
-    void setWeights(std::vector<HiddenTensor>);
-    std::vector<Matrix*> getWeights() { return weights; };
-
-    void setLearningRate(Scalar);
-    Scalar getLearningRate() { return learningRate; };
 };
